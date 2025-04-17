@@ -4,39 +4,22 @@ export const fetchMatches = createAsyncThunk(
   "matches/fetchMatches",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        "https://api.sofascore.com/api/v1/sport/football/scheduled-events/2025-04-15",
-        {
-          headers: {
-            "User-Agent": "Mozilla/5.0",
-          },
+      const response = await fetch('https://api.sofascore.com/api/v1/sport/football/scheduled-events/2025-04-15', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0'
         }
-      );
+      });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Network response was not ok');
       }
 
       const data = await response.json();
-      console.log("Raw API response:", data);
+      const quarterFinalMatches = data.events.slice(0, 4);
 
-      // Mock data for testing if API fails
-      const mockMatches = [
-        {
-          id: 1,
-          homeTeam: "Real Madrid",
-          awayTeam: "Manchester City",
-          startTime: "2025-04-15T19:45:00Z",
-        },
-        {
-          id: 2,
-          homeTeam: "Bayern Munich",
-          awayTeam: "PSG",
-          startTime: "2025-04-15T19:45:00Z",
-        },
-      ];
-
-      return mockMatches;
+      return quarterFinalMatches;
     } catch (error) {
       console.error("Fetch error:", error);
       return rejectWithValue(error.message);
@@ -63,6 +46,7 @@ export const matchesSlice = createSlice({
     builder
       .addCase(fetchMatches.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchMatches.fulfilled, (state, action) => {
         state.loading = false;
@@ -71,6 +55,7 @@ export const matchesSlice = createSlice({
       })
       .addCase(fetchMatches.rejected, (state, action) => {
         state.loading = false;
+        state.matches = [];
         state.error = action.payload;
       });
   },
