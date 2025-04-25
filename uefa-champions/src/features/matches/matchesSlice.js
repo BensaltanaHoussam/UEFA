@@ -4,20 +4,30 @@ export const fetchMatches = createAsyncThunk(
   "matches/fetchMatches",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch('https://api.sofascore.com/api/v1/sport/football/scheduled-events/2025-04-15', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0'
+      const response = await fetch(
+        "https://api.sofascore.com/api/v1/sport/football/scheduled-events/2025-04-16",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "User-Agent": "Mozilla/5.0",
+          },
         }
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error("Network response was not ok");
       }
 
+
       const data = await response.json();
-      const quarterFinalMatches = data.events.slice(0, 4);
+      const quarterFinalMatches = data.events.filter(
+          event => event.tournament.name.includes('UEFA Champions League, Knockout Phase') && 
+                event.roundInfo?.name === 'Quarterfinals'
+      );
+
+      console.log("Quarter Final Matches:", quarterFinalMatches);
+      
 
       return quarterFinalMatches;
     } catch (error) {
